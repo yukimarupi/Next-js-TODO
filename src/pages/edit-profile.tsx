@@ -1,3 +1,6 @@
+//友海追加分
+
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
