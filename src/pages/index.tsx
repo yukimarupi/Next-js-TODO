@@ -1,5 +1,6 @@
-import Link from 'next/link';
+import Link from 'next/link';  //Linkコンポーネントのインポート
 
+//ホームページの構成
 const HomePage = () => {
   return (
     <div style={{ textAlign: 'center', marginTop: '50px' }}>

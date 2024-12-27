@@ -1,14 +1,17 @@
+//モジュールのインポート
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 
 const LoginPage = () => {
+  //状態管理
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
 
+  //ログイン処理
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 

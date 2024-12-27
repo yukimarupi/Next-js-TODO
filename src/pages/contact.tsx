@@ -1,11 +1,13 @@
 import { useState } from 'react';
 
 const ContactPage = () => {
+  //Reactの状態管理フックuseStateを使用
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState('');
 
+  //フォーム送信のハンドリング
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -15,6 +17,7 @@ const ContactPage = () => {
     }
 
     try {
+      //APIリクエスト
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
@@ -23,6 +26,7 @@ const ContactPage = () => {
         body: JSON.stringify({ email, name, message }),
       });
 
+      //リクエスト成功・失敗時の処理
       if (response.ok) {
         setStatus('Your message has been sent!');
         setName('');

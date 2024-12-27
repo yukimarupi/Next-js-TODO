@@ -1,15 +1,18 @@
+//モジュールのインポート
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 
 const RegisterPage = () => {
+  //状態管理
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
 
+  //登録処理
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -18,18 +21,18 @@ const RegisterPage = () => {
       return;
     }
 
-    // Check if the user already exists
+    // ユーザーがすでに存在するかどうかを確認する
     const existingUser = Cookies.get('user');
     if (existingUser) {
       setError('User already exists. Please login.');
       return;
     }
 
-    // Save user data in cookies
+    // ユーザーデータをCookieに保存する
     const user = { username, password };
     Cookies.set('user', JSON.stringify(user), { expires: 7 });
 
-    // Redirect to login page
+    // ログインページにリダイレクト
     router.push('/login');
   };
 
