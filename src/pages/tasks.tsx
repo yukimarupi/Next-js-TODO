@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 //モジュールのインポート
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -13,8 +14,6 @@ type Task = {
 export const TasksPage = () => {
 
   const router = useRouter();
-
-
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
   //状態管理
@@ -23,27 +22,24 @@ export const TasksPage = () => {
   const [taskDescription, setTaskDescription] = useState('');
   const [editTaskId, setEditTaskId] = useState<number | null>(null);
 
-
-
   useEffect(() => {
-
-    //ログイン状態を確認
+    // ログイン状態を確認
     const isLoggedIn = Cookies.get('isLoggedIn');
+    console.log("🚀 ~ useEffect ~ isLoggedIn:", isLoggedIn)
     if (!isLoggedIn) {
       router.push('/login'); // 未ログインの場合はログインページへリダイレクト
     }
 
-    //Cookieからユーザー情報を読み込む
+    // Cookieからユーザー情報を読み込む
     const storedUser = Cookies.get('user');
+    console.log("🚀 ~ useEffect ~ storedUser:", storedUser)
     if (storedUser) {
-      try {
-        const user = JSON.parse(storedUser);
-        setProfileImage(
-          user.profileImage ||
-            '/path/to/default/image.png' // アップロードした画像のパスを指定
-        );
-      } catch (err) {
-        console.error('Failed to parse user cookie:', err);
+      // localStorageからプロフィール画像を読み込む
+      const storedProfileImage = localStorage.getItem('profileImage');
+      if (storedProfileImage) {
+        setProfileImage(storedProfileImage);
+      } else {
+        setProfileImage('default-profile.png'); // デフォルト画像を設定
       }
     }
 
@@ -52,14 +48,14 @@ export const TasksPage = () => {
     if (storedTasks) {
       setTasks(JSON.parse(storedTasks));
     }
-  }, [router]);
+  }, []);
 
-  //タスクをCookieに保存する
+  // タスクをCookieに保存する
   const saveTasksToCookies = (tasks: Task[]) => {
     Cookies.set('tasks', JSON.stringify(tasks), { expires: 7 });
   };
 
-  //タスクの追加
+  // タスクの追加
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -134,7 +130,7 @@ export const TasksPage = () => {
 
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
         <img
-          src={profileImage || '/path/to/default/image.png'}
+          src={profileImage || 'default-profile.png'}
           alt="Profile"
           style={{
             width: '100px',

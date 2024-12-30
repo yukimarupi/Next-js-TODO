@@ -55,10 +55,29 @@ const EditProfilePage = () => {
       return;
     }
 
+    if (!profileImage) {
+      setError('Please upload a profile image.');
+      return;
+    }
+
     const userData = { username, password, profileImage };
+    console.log("🚀 ~ handleSave ~ userData:", userData)
+
     try {
+      // ユーザーデータをクッキーに保存（画像データは除く）
       Cookies.set('user', JSON.stringify(userData), { expires: 7 });
+
+      // 画像データをlocalStorageに保存
+      localStorage.setItem('profileImage', profileImage);
+
       setSuccess('Profile updated successfully!');
+
+      // 保存確認
+      const storedUser = Cookies.get('user');
+      const storedProfileImage = localStorage.getItem('profileImage');
+      console.log("🚀 ~ handleSave ~ storedUser:", storedUser);
+      console.log("🚀 ~ handleSave ~ storedProfileImage:", storedProfileImage);
+
       setTimeout(() => {
         setSuccess('');
         router.push('/tasks');
