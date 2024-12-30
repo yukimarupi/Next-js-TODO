@@ -1,45 +1,72 @@
-//友海追加分
-
-
+/* eslint-disable @next/next/no-img-element */
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { TasksPage } from './tasks';
 
 const EditProfilePage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
-    // Cookie から現在のユーザー情報を取得
+    const isLoggedIn = Cookies.get('isLoggedIn');
+    if (!isLoggedIn) {
+      router.push('/login');
+      return;
+    }
+
     const storedUser = Cookies.get('user');
     if (storedUser) {
-      const user = JSON.parse(storedUser);
-      setUsername(user.username);
-      setPassword(user.password);
-    } else {
-      setError('No user found. Please log in.');
+      try {
+        const user = JSON.parse(storedUser);
+        setUsername(user.username || '');
+        setPassword(user.password || '');
+        setProfileImage(user.profileImage || null);
+      } catch (err) {
+        console.error('Failed to parse user cookie:', err);
+        setError('Failed to load user data. Please try again.');
+      }
     }
-  }, []);
+  }, [router]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        setProfileImage(reader.result as string); // Base64形式で画像を保存
+      };
+
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!username || !password) {
+    if (!username.trim() || !password.trim()) {
       setError('All fields are required.');
       return;
     }
 
-    // 新しいユーザー情報を Cookie に保存
-    const updatedUser = { username, password };
-    Cookies.set('user', JSON.stringify(updatedUser), { expires: 7 });
-
-    setSuccess('Profile updated successfully!');
-    setTimeout(() => {
-      router.push('/'); // ホームにリダイレクト
-    }, 2000);
+    const userData = { username, password, profileImage };
+    try {
+      Cookies.set('user', JSON.stringify(userData), { expires: 7 });
+      setSuccess('Profile updated successfully!');
+      setTimeout(() => {
+        setSuccess('');
+        router.push('/tasks');
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to save user data:', err);
+      setError('Failed to save changes. Please try again.');
+    }
   };
 
   return (
@@ -67,6 +94,24 @@ const EditProfilePage = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+        </div>
+        <div>
+          <label htmlFor="profileImage">Profile Image:</label>
+          <input
+            type="file"
+            id="profileImage"
+            accept="image/*"
+            onChange={handleImageChange}
+          />
+          {profileImage && (
+            <div style={{ marginTop: '10px' }}>
+              <img
+                src={profileImage}
+                alt="Profile Preview"
+                style={{ width: '100px', height: '100px', borderRadius: '50%' }}
+              />
+            </div>
+          )}
         </div>
         <button type="submit" style={{ marginTop: '10px' }}>
           Save Changes

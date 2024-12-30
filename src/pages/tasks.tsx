@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
+import { useRouter } from 'next/router';
 
 type Task = {
   id: number;
@@ -9,20 +10,49 @@ type Task = {
   description: string;
 };
 
-const TasksPage = () => {
+export const TasksPage = () => {
+
+  const router = useRouter();
+
+
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
   //状態管理
   const [tasks, setTasks] = useState<Task[]>([]);
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [editTaskId, setEditTaskId] = useState<number | null>(null);
 
+
+
   useEffect(() => {
+
+    //ログイン状態を確認
+    const isLoggedIn = Cookies.get('isLoggedIn');
+    if (!isLoggedIn) {
+      router.push('/login'); // 未ログインの場合はログインページへリダイレクト
+    }
+
+    //Cookieからユーザー情報を読み込む
+    const storedUser = Cookies.get('user');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setProfileImage(
+          user.profileImage ||
+            '/path/to/default/image.png' // アップロードした画像のパスを指定
+        );
+      } catch (err) {
+        console.error('Failed to parse user cookie:', err);
+      }
+    }
+
     // Cookieからタスクを読み込む
     const storedTasks = Cookies.get('tasks');
     if (storedTasks) {
       setTasks(JSON.parse(storedTasks));
     }
-  }, []);
+  }, [router]);
 
   //タスクをCookieに保存する
   const saveTasksToCookies = (tasks: Task[]) => {
@@ -101,6 +131,18 @@ const TasksPage = () => {
       </nav>
 
       <form onSubmit={editTaskId ? handleUpdateTask : handleAddTask}>
+
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <img
+          src={profileImage || '/path/to/default/image.png'}
+          alt="Profile"
+          style={{
+            width: '100px',
+            height: '100px',
+            borderRadius: '50%',
+          }}
+        />
+      </div>
         <div>
           <label htmlFor="taskName">Task Name:</label>
           <input

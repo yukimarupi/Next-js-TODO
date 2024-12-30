@@ -19,11 +19,6 @@ const HomePage = () => {
             </Link>
           </li>
           <li style={{ marginBottom: '10px' }}>
-            <Link href="/tasks" legacyBehavior>
-              <a style={{ textDecoration: 'none', color: 'blue' }}>Tasks</a>
-            </Link>
-          </li>
-          <li style={{ marginBottom: '10px' }}>
             <Link href="/contact" legacyBehavior>
               <a style={{ textDecoration: 'none', color: 'blue' }}>Contact</a>
             </Link>
