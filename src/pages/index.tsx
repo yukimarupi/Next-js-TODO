@@ -1,4 +1,5 @@
-import Link from 'next/link';  //Linkコンポーネントのインポート
+import React from 'react';
+import Link from 'next/link'; //Linkコンポーネントのインポート
 
 //ホームページの構成
 const HomePage = () => {

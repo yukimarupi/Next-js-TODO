@@ -1,5 +1,5 @@
 //モジュールのインポート
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 import Link from 'next/link';

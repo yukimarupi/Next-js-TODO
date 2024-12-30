@@ -1,6 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
 //モジュールのインポート
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
@@ -12,7 +11,6 @@ type Task = {
 };
 
 export const TasksPage = () => {
-
   const router = useRouter();
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
@@ -25,14 +23,14 @@ export const TasksPage = () => {
   useEffect(() => {
     // ログイン状態を確認
     const isLoggedIn = Cookies.get('isLoggedIn');
-    console.log("🚀 ~ useEffect ~ isLoggedIn:", isLoggedIn)
+    console.log('🚀 ~ useEffect ~ isLoggedIn:', isLoggedIn);
     if (!isLoggedIn) {
       router.push('/login'); // 未ログインの場合はログインページへリダイレクト
     }
 
     // Cookieからユーザー情報を読み込む
     const storedUser = Cookies.get('user');
-    console.log("🚀 ~ useEffect ~ storedUser:", storedUser)
+    console.log('🚀 ~ useEffect ~ storedUser:', storedUser);
     if (storedUser) {
       // localStorageからプロフィール画像を読み込む
       const storedProfileImage = localStorage.getItem('profileImage');
@@ -97,7 +95,7 @@ export const TasksPage = () => {
     const updatedTasks = tasks.map((task) =>
       task.id === editTaskId
         ? { ...task, name: taskName, description: taskDescription }
-        : task
+        : task,
     );
 
     setTasks(updatedTasks);
@@ -121,24 +119,26 @@ export const TasksPage = () => {
 
       {/* Edit Profileへのリンクを追加 */}
       <nav style={{ marginBottom: '20px' }}>
-        <Link href="/edit-profile" style={{ textDecoration: 'none', color: 'blue' }}>
+        <Link
+          href="/edit-profile"
+          style={{ textDecoration: 'none', color: 'blue' }}
+        >
           Edit Profile
         </Link>
       </nav>
 
       <form onSubmit={editTaskId ? handleUpdateTask : handleAddTask}>
-
-      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-        <img
-          src={profileImage || 'default-profile.png'}
-          alt="Profile"
-          style={{
-            width: '100px',
-            height: '100px',
-            borderRadius: '50%',
-          }}
-        />
-      </div>
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <img
+            src={profileImage || 'default-profile.png'}
+            alt="Profile"
+            style={{
+              width: '100px',
+              height: '100px',
+              borderRadius: '50%',
+            }}
+          />
+        </div>
         <div>
           <label htmlFor="taskName">Task Name:</label>
           <input
@@ -175,7 +175,10 @@ export const TasksPage = () => {
           >
             <h3>{task.name}</h3>
             <p>{task.description}</p>
-            <button onClick={() => handleEditTask(task)} style={{ marginRight: '10px' }}>
+            <button
+              onClick={() => handleEditTask(task)}
+              style={{ marginRight: '10px' }}
+            >
               Edit
             </button>
             <button onClick={() => handleDeleteTask(task.id)}>Delete</button>

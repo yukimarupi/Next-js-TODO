@@ -1,5 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -61,7 +60,7 @@ const EditProfilePage = () => {
     }
 
     const userData = { username, password, profileImage };
-    console.log("🚀 ~ handleSave ~ userData:", userData)
+    console.log('🚀 ~ handleSave ~ userData:', userData);
 
     try {
       // ユーザーデータをクッキーに保存（画像データは除く）
@@ -71,13 +70,6 @@ const EditProfilePage = () => {
       localStorage.setItem('profileImage', profileImage);
 
       setSuccess('Profile updated successfully!');
-
-      // 保存確認
-      const storedUser = Cookies.get('user');
-      const storedProfileImage = localStorage.getItem('profileImage');
-      console.log("🚀 ~ handleSave ~ storedUser:", storedUser);
-      console.log("🚀 ~ handleSave ~ storedProfileImage:", storedProfileImage);
-
       setTimeout(() => {
         setSuccess('');
         router.push('/tasks');
