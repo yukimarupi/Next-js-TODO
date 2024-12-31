@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
+import { signIn } from 'next-auth/react'; // Google認証のため追加
 
 const RegisterPage = () => {
   //状態管理
@@ -34,6 +35,21 @@ const RegisterPage = () => {
 
     // ログインページにリダイレクト
     router.push('/login');
+  };
+
+  // Google認証処理
+  const handleGoogleLogin = async () => {
+    try {
+      // Google認証を実行
+      const result = await signIn('google', { callbackUrl: '/tasks' });
+
+      // Googleユーザー情報をCookieに保存（オプション）
+      if (result && result.ok) {
+        Cookies.set('isGoogleUser', 'true', { expires: 7 });
+      }
+    } catch (error) {
+      console.error('Google login error:', error);
+    }
   };
 
   return (
@@ -75,6 +91,20 @@ const RegisterPage = () => {
           Register
         </button>
       </form>
+      <button
+        onClick={handleGoogleLogin}
+        style={{
+          marginTop: '10px',
+          backgroundColor: '#4285F4',
+          color: 'white',
+          padding: '10px 20px',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+        }}
+      >
+        Register with Google
+      </button>
       <p>
         Already have an account? <Link href="/login">Login here</Link>.
       </p>

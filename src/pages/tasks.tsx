@@ -1,4 +1,3 @@
-//モジュールのインポート
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
@@ -20,37 +19,39 @@ export const TasksPage = () => {
   const [taskDescription, setTaskDescription] = useState('');
   const [editTaskId, setEditTaskId] = useState<number | null>(null);
 
+  const [isGoogleUser, setIsGoogleUser] = useState(false); // Googleユーザーかどうかの判定
+
   useEffect(() => {
     // ログイン状態を確認
     const isLoggedIn = Cookies.get('isLoggedIn');
-    console.log('🚀 ~ useEffect ~ isLoggedIn:', isLoggedIn);
     if (!isLoggedIn) {
       router.push('/login'); // 未ログインの場合はログインページへリダイレクト
     }
 
-    // Cookieからユーザー情報を読み込む
-    const storedUser = Cookies.get('user');
-    console.log('🚀 ~ useEffect ~ storedUser:', storedUser);
-    if (storedUser) {
-      // localStorageからプロフィール画像を読み込む
-      const storedProfileImage = localStorage.getItem('profileImage');
-      if (storedProfileImage) {
-        setProfileImage(storedProfileImage);
-      } else {
-        setProfileImage('default-profile.png'); // デフォルト画像を設定
-      }
-    }
+    // Googleユーザーかどうかを確認
+    const googleUser = Cookies.get('isGoogleUser') === 'true';
+    setIsGoogleUser(googleUser);
 
-    // Cookieからタスクを読み込む
-    const storedTasks = Cookies.get('tasks');
+    // Cookieからタスクを読み込む（ユーザータイプごとに別のキーを使用）
+    const taskKey = googleUser ? 'googleTasks' : 'manualTasks';
+    const storedTasks = Cookies.get(taskKey);
     if (storedTasks) {
       setTasks(JSON.parse(storedTasks));
+    }
+
+    // プロフィール画像の読み込み
+    const storedProfileImage = localStorage.getItem('profileImage');
+    if (storedProfileImage) {
+      setProfileImage(storedProfileImage);
+    } else {
+      setProfileImage('default-profile.png'); // デフォルト画像を設定
     }
   }, []);
 
   // タスクをCookieに保存する
   const saveTasksToCookies = (tasks: Task[]) => {
-    Cookies.set('tasks', JSON.stringify(tasks), { expires: 7 });
+    const taskKey = isGoogleUser ? 'googleTasks' : 'manualTasks'; // ユーザータイプごとのキーを選択
+    Cookies.set(taskKey, JSON.stringify(tasks), { expires: 7 });
   };
 
   // タスクの追加

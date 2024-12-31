@@ -10,8 +10,10 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@next-auth/prisma-adapter": "^1.0.7",
     "js-cookie": "^3.0.5",
     "next": "latest",
+    "next-auth": "^4.24.11",
     "react": "latest",
     "react-dom": "latest",
     "tailwindcss": "^3.4.17"
