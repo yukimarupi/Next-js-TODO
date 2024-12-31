@@ -8,11 +8,12 @@ const LoginPage = () => {
   // 状態管理
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(''); // メールアドレス入力用
   const [error, setError] = useState('');
   const { data: session } = useSession();
   const router = useRouter();
 
-  // カスタムログイン処理
+  // カスタムログイン処理（クッキー認証用）
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -38,10 +39,7 @@ const LoginPage = () => {
   // Googleログイン処理
   const handleGoogleLogin = async () => {
     try {
-      // Google認証を実行
       const result = await signIn('google', { callbackUrl: '/tasks' });
-
-      // Googleユーザー情報をCookieに保存（オプション）
       if (result && result.ok) {
         Cookies.set('isGoogleUser', 'true', { expires: 7 });
       }
@@ -50,6 +48,23 @@ const LoginPage = () => {
     }
   };
 
+  // メールアドレスログイン処理
+  const handleEmailLogin = async () => {
+    if (!email) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    try {
+      const result = await signIn('email', { email, callbackUrl: '/tasks' });
+      if (result && result.ok) {
+        Cookies.set('isEmailUser', 'true', { expires: 7 });
+      }
+    } catch (error) {
+      console.error('Email login error:', error);
+      setError('Failed to login with email. Please try again.');
+    }
+  };
 
   // ログイン済みの場合の処理
   if (session) {
@@ -65,6 +80,8 @@ const LoginPage = () => {
   return (
     <div style={{ maxWidth: '400px', margin: '0 auto', padding: '20px' }}>
       <h1>Login</h1>
+
+      {/* クッキー認証ログインフォーム */}
       <form onSubmit={handleLogin}>
         <div>
           <label htmlFor="username">Username:</label>
@@ -91,6 +108,8 @@ const LoginPage = () => {
           Login
         </button>
       </form>
+
+      {/* Googleログインボタン */}
       <button
         onClick={handleGoogleLogin}
         style={{
@@ -105,6 +124,34 @@ const LoginPage = () => {
       >
         Login with Google
       </button>
+
+      {/* メールアドレスログインフォーム */}
+      <div style={{ marginTop: '20px' }}>
+        <label htmlFor="email">Login with Email:</label>
+        <input
+          type="email"
+          id="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter your email"
+          required
+        />
+        <button
+          onClick={handleEmailLogin}
+          style={{
+            marginLeft: '10px',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            padding: '5px 15px',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+          }}
+        >
+          Send Login Link
+        </button>
+      </div>
+
       <p>
         Don&apos;t have an account? <Link href="/register">Register here</Link>.
       </p>
