@@ -5,6 +5,7 @@ import Cookies from 'js-cookie';
 import { TasksPage } from './tasks';
 
 const EditProfilePage = () => {
+  //状態管理
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -12,6 +13,7 @@ const EditProfilePage = () => {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  //ユーザー認証と初期データの読み込み
   useEffect(() => {
     const isLoggedIn = Cookies.get('isLoggedIn');
     if (!isLoggedIn) {
@@ -33,6 +35,7 @@ const EditProfilePage = () => {
     }
   }, [router]);
 
+  //プロフィール画像のアップロード
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -46,6 +49,7 @@ const EditProfilePage = () => {
     }
   };
 
+  //フォーム送信の処理
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 

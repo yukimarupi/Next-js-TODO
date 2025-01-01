@@ -11,10 +11,12 @@ const prisma = new PrismaClient();
 
 export default NextAuth({
   providers: [
+    // Google OAuth を利用して認証を行う設定
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
+    // Magic Link をメールで送信するための設定
     EmailProvider({
       server: {
         host: process.env.EMAIL_SERVER_HOST,
@@ -24,7 +26,7 @@ export default NextAuth({
           pass: process.env.EMAIL_SERVER_PASSWORD,
         },
       },
-      from: process.env.EMAIL_FROM,
+      from: process.env.EMAIL_FROM, // 送信元のメールアドレス
       sendVerificationRequest: async ({ identifier, url, token, baseUrl }) => {
         // Nodemailer を使用してメールを送信
         const transporter = nodemailer.createTransport({
@@ -53,12 +55,14 @@ export default NextAuth({
       },
     }),
   ],
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma), // NextAuth が Prisma を介してデータベース（ユーザー情報やセッション情報）を管理できるようにする
   secret: process.env.NEXTAUTH_SECRET,
   session: {
+    // JWT (JSON Web Token) を使用してセッションを管理する設定
     jwt: true, // JWT を使用
   },
   callbacks: {
+    // コールバック関数
     async signIn({ user, account }) {
       if (account.provider === 'google') {
         console.log('Google user signed in:', user);

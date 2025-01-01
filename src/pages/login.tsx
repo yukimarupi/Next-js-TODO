@@ -13,7 +13,7 @@ const LoginPage = () => {
   const { data: session } = useSession();
   const router = useRouter();
 
-  // カスタムログイン処理（クッキー認証用）
+  // クッキー認証ログイン
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -36,7 +36,7 @@ const LoginPage = () => {
     }
   };
 
-  // Googleログイン処理
+  // Googleログイン
   const handleGoogleLogin = async () => {
     try {
       const result = await signIn('google', { callbackUrl: '/tasks' });
@@ -48,7 +48,7 @@ const LoginPage = () => {
     }
   };
 
-  // メールアドレスログイン処理
+  // メールアドレスログイン
   const handleEmailLogin = async () => {
     if (!email) {
       setError('Please enter a valid email address.');
@@ -66,7 +66,7 @@ const LoginPage = () => {
     }
   };
 
-  // ログイン済みの場合の処理
+  // ログイン済みユーザーの処理
   if (session) {
     return (
       <div>

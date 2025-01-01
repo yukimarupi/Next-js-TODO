@@ -37,7 +37,7 @@ const RegisterPage = () => {
     router.push('/login');
   };
 
-  // Google認証処理
+  // Google認証を使用した登録
   const handleGoogleLogin = async () => {
     try {
       // Google認証を実行
