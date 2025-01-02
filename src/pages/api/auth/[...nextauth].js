@@ -6,11 +6,18 @@ import EmailProvider from 'next-auth/providers/email';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { PrismaClient } from '@prisma/client';
 import nodemailer from 'nodemailer'; // nodemailer をインポート
+import Auth0Provider from 'next-auth/providers/auth0';
 
 const prisma = new PrismaClient();
 
 export default NextAuth({
   providers: [
+    //Auth0追加部分
+    Auth0Provider({
+      clientId: process.env.AUTH0_CLIENT_ID,
+      clientSecret: process.env.AUTH0_CLIENT_SECRET,
+      domain: process.env.AUTH0_DOMAIN,
+    }),
     // Google OAuth を利用して認証を行う設定
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,

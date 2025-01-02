@@ -41,7 +41,7 @@ const ContactPage = () => {
     }
   };
 
-  return (
+  return (  //フォームの UI
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
       <h1>Contact Us</h1>
       <form onSubmit={handleSubmit}>

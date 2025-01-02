@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
+import toastr from 'toastr';
 
 type Task = {
   id: number;
@@ -22,24 +23,20 @@ export const TasksPage = () => {
   const [isGoogleUser, setIsGoogleUser] = useState(false); // Googleユーザーかどうかの判定
 
   useEffect(() => {
-    // ログイン状態を確認
     const isLoggedIn = Cookies.get('isLoggedIn');
     if (!isLoggedIn) {
       router.push('/login'); // 未ログインの場合はログインページへリダイレクト
     }
 
-    // Googleユーザーかどうかを確認
     const googleUser = Cookies.get('isGoogleUser') === 'true';
     setIsGoogleUser(googleUser);
 
-    // Cookieからタスクを読み込む（ユーザータイプごとに別のキーを使用）
     const taskKey = googleUser ? 'googleTasks' : 'manualTasks';
     const storedTasks = Cookies.get(taskKey);
     if (storedTasks) {
       setTasks(JSON.parse(storedTasks));
     }
 
-    // プロフィール画像の読み込み
     const storedProfileImage = localStorage.getItem('profileImage');
     if (storedProfileImage) {
       setProfileImage(storedProfileImage);
@@ -48,13 +45,11 @@ export const TasksPage = () => {
     }
   }, []);
 
-  // タスクをCookieに保存する
   const saveTasksToCookies = (tasks: Task[]) => {
-    const taskKey = isGoogleUser ? 'googleTasks' : 'manualTasks'; // ユーザータイプごとのキーを選択
+    const taskKey = isGoogleUser ? 'googleTasks' : 'manualTasks';
     Cookies.set(taskKey, JSON.stringify(tasks), { expires: 7 });
   };
 
-  // タスクの追加
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -73,18 +68,18 @@ export const TasksPage = () => {
     setTasks(updatedTasks);
     saveTasksToCookies(updatedTasks);
 
+    toastr.success(`Task "${newTask.name}" has been added!`);
+
     setTaskName('');
     setTaskDescription('');
   };
 
-  //タスクの編集
   const handleEditTask = (task: Task) => {
     setEditTaskId(task.id);
     setTaskName(task.name);
     setTaskDescription(task.description);
   };
 
-  //タスクリストを更新し、対象のタスクのみ名前や説明を上書き
   const handleUpdateTask = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -107,23 +102,121 @@ export const TasksPage = () => {
     setEditTaskId(null);
   };
 
-  //タスクの削除
   const handleDeleteTask = (id: number) => {
+    const taskToDelete = tasks.find((task) => task.id === id);
     const updatedTasks = tasks.filter((task) => task.id !== id);
     setTasks(updatedTasks);
     saveTasksToCookies(updatedTasks);
+
+    if (taskToDelete) {
+      toastr.info(`Task "${taskToDelete.name}" has been completed!`);
+    }
+  };
+
+  const registerServiceWorker = async () => {
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        console.log('Service Worker registered successfully:', registration);
+      } catch (error: any) {
+        console.error('Service Worker registration failed:', error.message);
+        console.error('Error stack:', error.stack);
+      }
+    } else {
+      console.error('Service Worker is not supported in this browser.');
+    }
+  };
+
+  const urlBase64ToUint8Array = (base64String: string) => {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  };
+
+  const requestNotificationPermission = async () => {
+    if (!('Notification' in window)) {
+      alert('このブラウザは通知をサポートしていません。');
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      console.log('通知が許可されました！');
+    } else if (permission === 'denied') {
+      console.warn('通知が拒否されました。');
+    } else {
+      console.log('通知の権限リクエストがスキップされました。');
+    }
+  };
+
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
+
+  const subscribeToPushNotifications = async () => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+
+        // VAPID_PUBLIC_KEY を Uint8Array に変換
+        const applicationServerKey = urlBase64ToUint8Array(
+          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY as string
+        );
+
+        // サブスクリプションを作成
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey,
+        });
+
+        console.log('Push Subscription:', subscription);
+
+        // サブスクリプションをAPIに送信
+        await fetch('/api/notify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ subscription }),
+        });
+
+        console.log('Push Subscription sent to server successfully.');
+      } catch (error) {
+        console.error('Push Subscription failed:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const setupPushNotifications = async () => {
+      await registerServiceWorker();
+      await subscribeToPushNotifications();
+    };
+
+    setupPushNotifications();
+  }, []);
+
+  const handleSubscribe = async () => {
+    try {
+      await subscribeToPushNotifications();
+      console.log('Push Subscription triggered manually.');
+    } catch (error) {
+      console.error('Error in manual subscription:', error);
+    }
   };
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
       <h1>Task Management</h1>
-
-      {/* Edit Profileへのリンクを追加 */}
+      <button onClick={handleSubscribe}>通知購読を手動でテスト</button>
       <nav style={{ marginBottom: '20px' }}>
-        <Link
-          href="/edit-profile"
-          style={{ textDecoration: 'none', color: 'blue' }}
-        >
+        <Link href="/edit-profile" style={{ textDecoration: 'none', color: 'blue' }}>
           Edit Profile
         </Link>
       </nav>
@@ -133,11 +226,7 @@ export const TasksPage = () => {
           <img
             src={profileImage || 'default-profile.png'}
             alt="Profile"
-            style={{
-              width: '100px',
-              height: '100px',
-              borderRadius: '50%',
-            }}
+            style={{ width: '100px', height: '100px', borderRadius: '50%' }}
           />
         </div>
         <div>
@@ -176,10 +265,7 @@ export const TasksPage = () => {
           >
             <h3>{task.name}</h3>
             <p>{task.description}</p>
-            <button
-              onClick={() => handleEditTask(task)}
-              style={{ marginRight: '10px' }}
-            >
+            <button onClick={() => handleEditTask(task)} style={{ marginRight: '10px' }}>
               Edit
             </button>
             <button onClick={() => handleDeleteTask(task.id)}>Delete</button>

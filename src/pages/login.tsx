@@ -36,6 +36,18 @@ const LoginPage = () => {
     }
   };
 
+  //Auth0ログイン
+  const handleAuth0Login = async () => {
+    try {
+      const result = await signIn('auth0', { callbackUrl: '/tasks' });
+      if (result && result.ok) {
+        Cookies.set('isAuth0User', 'true', { expires: 7 });
+      }
+    } catch (error) {
+      console.error('Auth0 login error:', error);
+    }
+  };
+
   // Googleログイン
   const handleGoogleLogin = async () => {
     try {
@@ -108,6 +120,22 @@ const LoginPage = () => {
           Login
         </button>
       </form>
+
+      {/* Auth0ログインボタン */}
+      <button
+        onClick={handleAuth0Login}
+        style={{
+          marginTop: '10px',
+          backgroundColor: '#0A66C2',
+          color: 'white',
+          padding: '10px 20px',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+        }}
+      >
+        Login with Auth0
+      </button>
 
       {/* Googleログインボタン */}
       <button
